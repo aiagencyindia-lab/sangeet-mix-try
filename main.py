@@ -164,7 +164,7 @@ async def process_songs(
         uploads: dict[int, tuple[bytes, str]] = {}
         for s in raw_songs:
             uf = s["file"]
-            if s["type"] == "upload" and uf and uf.filename:
+            if s["type"] in ("upload", "up") and uf and uf.filename:
                 content = await uf.read()
                 if content:
                     uploads[s["n"]] = (content, uf.filename)
@@ -180,7 +180,7 @@ async def process_songs(
             if not stype:
                 continue
 
-            if stype == "youtube":
+            if stype in ("youtube", "yt"):
                 url = (s["url"] or "").strip()
                 if not url:
                     continue
@@ -199,7 +199,7 @@ async def process_songs(
                         detail=f"Song {n}: yt-dlp ran but produced no output file.",
                     )
 
-            elif stype == "upload":
+            elif stype in ("upload", "up"):
                 if n not in uploads:
                     continue
                 content, fname = uploads[n]

@@ -61,6 +61,7 @@ def _yt_download(url: str, out_template: str) -> None:
     """Blocking: download audio from YouTube via yt-dlp."""
     cmd = [
         "yt-dlp",
+        "-f", "bestaudio/best",
         "-x",
         "--audio-format", "mp3",
         "--audio-quality", "0",

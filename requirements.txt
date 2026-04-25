@@ -2,4 +2,4 @@ fastapi
 uvicorn[standard]
 python-multipart
 pydub
-yt-dlp
+yt-dlp==2025.4.30

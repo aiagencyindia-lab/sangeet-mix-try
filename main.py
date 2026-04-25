@@ -61,16 +61,18 @@ def _yt_download(url: str, out_template: str) -> None:
     """Blocking: download audio from YouTube via yt-dlp."""
     cmd = [
         "yt-dlp",
-        "-f", "bestaudio/best",
+        # Use 'ba' (best audio) and let yt-dlp handle the best compatible match
+        "-f", "ba/b", 
         "-x",
         "--audio-format", "mp3",
         "--audio-quality", "0",
         "--no-playlist",
         "--no-warnings",
         "--retries", "3",
+        # Add this to handle the "format not available" error specifically
+        "--prefer-free-formats",
     ]
     
-    # If the user provides a cookies.txt file, use it to bypass the "Sign in" block
     if os.path.exists("cookies.txt"):
         cmd.extend(["--cookies", "cookies.txt"])
         
@@ -78,10 +80,14 @@ def _yt_download(url: str, out_template: str) -> None:
         "-o", out_template,
         url,
     ])
-    result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+    
+    # Increase timeout to 600 if videos are long
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+    
     if result.returncode != 0:
-        # Surface the most useful part of the error
         stderr = result.stderr.strip()
+        # Log the error so you can see it in Railway logs
+        print(f"yt-dlp Error: {stderr}")
         last_lines = "\n".join(stderr.splitlines()[-5:])
         raise RuntimeError(f"yt-dlp failed:\n{last_lines}")
 

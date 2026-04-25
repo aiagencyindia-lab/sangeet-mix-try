@@ -56,9 +56,18 @@ def _yt_download(url: str, out_template: str) -> None:
         "--no-playlist",
         "--no-warnings",
         "--retries", "3",
+        # Workaround to bypass some of YouTube's bot detection on cloud servers
+        "--extractor-args", "youtube:player_client=android,ios,web",
+    ]
+    
+    # If the user provides a cookies.txt file, use it to bypass the "Sign in" block
+    if os.path.exists("cookies.txt"):
+        cmd.extend(["--cookies", "cookies.txt"])
+        
+    cmd.extend([
         "-o", out_template,
         url,
-    ]
+    ])
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
     if result.returncode != 0:
         # Surface the most useful part of the error

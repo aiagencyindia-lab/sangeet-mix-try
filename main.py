@@ -18,6 +18,17 @@ from fastapi.staticfiles import StaticFiles
 app = FastAPI(title="Sangeet Mix Maker")
 executor = ThreadPoolExecutor(max_workers=2)
 
+@app.on_event("startup")
+def load_env_cookies():
+    """Load cookies securely from Railway Environment Variables so they aren't pushed to GitHub."""
+    cookies_content = os.environ.get("YOUTUBE_COOKIES")
+    if cookies_content:
+        with open("cookies.txt", "w") as f:
+            # Fix escaped newlines if passed via some env managers
+            content = cookies_content.replace("\\n", "\n")
+            f.write(content)
+        print("✅ Successfully loaded YOUTUBE_COOKIES from environment variables.")
+
 OUTPUT_DIR = Path("outputs")
 OUTPUT_DIR.mkdir(exist_ok=True)
 
@@ -56,8 +67,6 @@ def _yt_download(url: str, out_template: str) -> None:
         "--no-playlist",
         "--no-warnings",
         "--retries", "3",
-        # Workaround to bypass some of YouTube's bot detection on cloud servers
-        "--extractor-args", "youtube:player_client=android,ios,web",
     ]
     
     # If the user provides a cookies.txt file, use it to bypass the "Sign in" block
